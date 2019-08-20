@@ -92,6 +92,8 @@ router.get("/articles-json", function(req, res) {
   });
 });
 
+
+//clear all of articles in json
 router.get("/clearAll", function(req, res) {
   Article.remove({}, function(err, doc) {
     if (err) {
@@ -103,70 +105,77 @@ router.get("/clearAll", function(req, res) {
   res.redirect("/articles-json");
 });
 
-// router.get("/readArticle/:id", function(req, res) {
-//   var articleId = req.params.id;
-//   var hbsObj = {
-//     article: [],
-//     body: []
-//   };
 
-//   Article.findOne({ _id: articleId })
-//     .populate("comment")
-//     .exec(function(err, doc) {
-//       if (err) {
-//         console.log("Error: " + err);
-//       } else {
-//         hbsObj.article = doc;
-//         var link = doc.link;
-//         request(link, function(error, response, html) {
-//           var $ = cheerio.load(html);
+router.get("/readArticle/:id", function(req, res) {
+  var articleId = req.params.id;
+  var hbsObj = {
+    article: [],
+    body: []
+  };
 
-//           $(".l-col__main").each(function(i, element) {
-//             hbsObj.body = $(this)
-//               .children(".full-item")
-//               .children(".full-item-title")
-//               .text();
+  Article.findOne({ _id: articleId })
+    .populate("comment")
+    .exec(function(err, doc) {
+      if (err) {
+        console.log("Error: " + err);
+      } else {
 
-//             res.render("article", hbsObj);
-//             return false;
-//           });
-//         });
-//       }
-//     });
-// });
+        hbsObj.article = doc;
+        var link = doc.link;
+        const fullLink = "https://www.esquire.com" +link
+        console.log(fullLink); 
+        request(fullLink, function(error, response, html) {
+          var $ = cheerio.load(html);
+
+          
+          $(".site-content").each(function(i, el) {
+
+            hbsObj.body = $(el)
+              //.find(".listicle-intro")
+              .find("p")
+              .text();
+         
+            res.render("article", hbsObj);
+            console.log(hbsObj);
+            return false;
+          });
+        });
+      }
+    });
+});
 
 
-// router.post("/comment/:id", function(req, res) {
-//   var user = req.body.name;
-//   var content = req.body.comment;
-//   var articleId = req.params.id;
+router.post("/comment/:id", function(req, res) {
+  var user = req.body.name;
+  var content = req.body.comment;
+  var articleId = req.params.id;
 
-//   var commentObj = {
-//     name: user,
-//     body: content
-//   };
+  var commentObj = {
+    name: user,
+    body: content
+  };
 
-//   var newComment = new Comment(commentObj);
+  var newComment = new Comment(commentObj);
 
-//   newComment.save(function(err, doc) {
-//     if (err) {
-//       console.log(err);
-//     } else {
-//       console.log(doc._id);
-//       console.log(articleId);
+  newComment.save(function(err, doc) {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(doc._id);
+      console.log(articleId);
 
-//       Article.findOneAndUpdate(
-//         { _id: req.params.id },
-//         { $push: { comment: doc._id } },
-//         { new: true }
-//       ).exec(function(err, doc) {
-//         if (err) {
-//           console.log(err);
-//         } else {
-//           res.redirect("/readArticle/" + articleId);
-//         }
-//       });
-//     }
-//   });
-// });
+      Article.findOneAndUpdate(
+        { _id: req.params.id },
+        { $push: { comment: doc._id } },
+        { new: true }
+      ).exec(function(err, doc) {
+        if (err) {
+          console.log(err);
+        } else {
+          res.redirect("/readArticle/" + articleId);
+        }
+      });
+    }
+  });
+});
 module.exports = router;

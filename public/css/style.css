@@ -37,3 +37,6 @@ body {
   .topnav {
     background-color: #635f60;
   }
+  img{
+    width:100%;
+  }

@@ -8,24 +8,24 @@ const writeStream = fs.createWriteStream('post.csv');
 
 writeStream.write(`title,link\n`);
 
-request('https://www.esquire.com/food-drink/', (err, res, html)=>{
+request('https://www.esquire.com/food-drink/drinks/g1569/good-alcoholic-beers/', (err, res, html)=>{
     if(!err && res.statusCode == 200){
        const $ = cheerio.load(html);
 
 
-      $('.full-item').each((i, el) => {
+      $('.site-content').each((i, el) => {
 
         const title = $(el)
-        .find('.full-item-title')
+        .find('p')
         .text()
-        .replace(/\s\s+/g, '');
-
-        
-        const link = $(el).find('.full-item-title').attr('href');
-        const author = $(el).find('.byline').text().replace(/\s\s+/g, '');
+       // .replace(/\s\s+/g, '');
 
 
-       console.log(author);
+        // const link = $(el).find('.full-item-title').attr('href');
+        // const author = $(el).find('.byline').text().replace(/\s\s+/g, '');
+
+
+       console.log(title);
 
       });
       console.log('scraping done');
